@@ -15,7 +15,8 @@ namespace Snake
         ConsoleKeyInfo input = new ConsoleKeyInfo();
 
         public int bodyCount = 1;
-        public (int, int)[] bodyArr = new (int, int)[50];
+        //public (int, int)[] bodyArr = new (int, int)[50];
+        public LinkedList<(int col, int row)> body = new LinkedList<(int col, int row)>();
         public int index;
 
         public void InitBody(Map m)
@@ -24,133 +25,33 @@ namespace Snake
             col = rnd.Next(4, 10);
             row = rnd.Next(4, 10);
 
+            body.Clear();
             m.map[col, row] = '0';
-            bodyArr[0] = (col, row);
+            body.AddFirst((col, row));
         }
 
         public void MoveBody(Map m)
         {
-            for(int i = 0; i < bodyCount; i++)
+            if (Console.KeyAvailable)
             {
-                m.map[bodyArr[i].Item1, bodyArr[i].Item2] = ' ';
-                if (Console.KeyAvailable)
+                input = Console.ReadKey(true);
+                Vector2 beforeVec = dir;
+                dir = input.Key switch
                 {
-                    input = Console.ReadKey(true);
-                    switch (input.Key)
-                    {
-                        case ConsoleKey.RightArrow:
-                            if (dir.X == 1)
-                            {
-                                dir.X = 1;
-                                break;
-                            }
-                            if (dir.X == -1)
-                            {
-                                dir.X = -1;
-                                break;
-                            }
-
-                            dir.X = 1;
-                            dir.Y = 0;
-                            break;
-                        case ConsoleKey.LeftArrow:
-                            if (dir.X == -1)
-                            {
-                                dir.X = -1;
-                                break;
-                            }
-                            else if (dir.X == 1)
-                            {
-                                dir.X = 1;
-                                break;
-                            }
-
-                            dir.X = -1;
-                            dir.Y = 0;
-                            break;
-                        case ConsoleKey.UpArrow:
-                            if (dir.Y == 1)
-                            {
-                                dir.Y = 1;
-                                break;
-                            }
-                            else if (dir.Y == -1)
-                            {
-                                dir.Y = -1;
-                                break;
-                            }
-
-                            dir.X = 0;
-                            dir.Y = 1;
-                            break;
-                        case ConsoleKey.DownArrow:
-                            if (dir.Y == -1)
-                            {
-                                dir.Y = -1;
-                                break;
-                            }
-                            else if (dir.Y == 1)
-                            {
-                                dir.Y = 1;
-                                break;
-                            }
-
-                            dir.X = 0;
-                            dir.Y = -1;
-                            break;
-                    }
-                }
-
-                if (dir.X != 0)
+                    ConsoleKey.RightArrow => new Vector2(1, 0),
+                    ConsoleKey.LeftArrow => new Vector2(-1, 0),
+                    ConsoleKey.UpArrow => new Vector2(0, -1),
+                    ConsoleKey.DownArrow => new Vector2(0, 1),
+                };
+                // 길이가 2 이상일 때 정반대 전환 금지
+                if (!(body.Count > 1 && beforeVec.X == dir.X && beforeVec.Y == dir.Y))
                 {
-                    switch (dir.X)
-                    {
-                        case 1:
-                            bodyArr[i].Item2++;
-                            if(i == 0)
-                            {
-                                row++;
-                            }
-                            break;
-                        case -1:
-                            bodyArr[i].Item2--;
-                            if (i == 0)
-                            {
-                                row--;
-                            }
-                            break;
-                    }
-                }
-                else
-                {
-                    switch (dir.Y)
-                    {
-                        case 1:
-                            bodyArr[i].Item1--;
-                            if (i == 0)
-                            {
-                                col--;
-                            }
-                            break;
-                        case -1:
-                            bodyArr[i].Item1++;
-                            if (i == 0)
-                            {
-                                col++;
-                            }
-                            break;
-                    }
-                }
-
-                if (GameOver(m, i))
-                {
-                    index = i;
                     return;
                 }
-
-                m.map[bodyArr[i].Item1, bodyArr[i].Item2] = '0';
             }
-            
+
+
+
         }
 
         public bool GameOver(Map m, int i)

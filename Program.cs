@@ -47,7 +47,6 @@ while (true)
                 if (input.Key == ConsoleKey.Spacebar)
                 {
                     m.InitMap();
-                    snake.BodyReset();
                     snake.InitBody(m);
                     Feed.MakeFeed(m);
                     score = 0;
