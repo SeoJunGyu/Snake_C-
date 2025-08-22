@@ -35,7 +35,7 @@ while (true)
     Console.SetCursorPosition(0, 0);
     
     snake.MoveBody(m);
-    if(snake.GameOver(m, snake.index))
+    if(snake.GameOver(m))
     {
         Console.Clear();
         while (isStart)
@@ -61,7 +61,6 @@ while (true)
     if(snake.col == Feed.col && snake.row == Feed.row)
     {
         Feed.MakeFeed(m);
-        //snake.AddBody(m);
         score++;
     }
     m.ShowMap();

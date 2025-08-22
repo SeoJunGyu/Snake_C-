@@ -13,8 +13,12 @@ namespace Snake
         public static void MakeFeed(Map m)
         {
             Random rnd = new Random();
-            col = rnd.Next(1, 19);
-            row = rnd.Next(1, 19);
+            do
+            {
+                col = rnd.Next(1, 19);
+                row = rnd.Next(1, 19);
+            }
+            while (m.map[col, row] != ' ');
 
             m.map[col, row] = '*';
         }

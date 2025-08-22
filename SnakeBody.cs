@@ -19,6 +19,8 @@ namespace Snake
         public LinkedList<(int col, int row)> body = new LinkedList<(int col, int row)>();
         public int index;
 
+        public (int c, int r) nextHead;
+
         public void InitBody(Map m)
         {
             Random rnd = new Random();
@@ -28,75 +30,84 @@ namespace Snake
             body.Clear();
             m.map[col, row] = '0';
             body.AddFirst((col, row));
+
+            nextHead = (col, row);
         }
 
         public void MoveBody(Map m)
         {
+            var head = body.First.Value;
+
             if (Console.KeyAvailable)
             {
                 input = Console.ReadKey(true);
-                Vector2 beforeVec = dir;
-                dir = input.Key switch
+                switch(input.Key)
                 {
-                    ConsoleKey.RightArrow => new Vector2(1, 0),
-                    ConsoleKey.LeftArrow => new Vector2(-1, 0),
-                    ConsoleKey.UpArrow => new Vector2(0, -1),
-                    ConsoleKey.DownArrow => new Vector2(0, 1),
-                };
-                // 길이가 2 이상일 때 정반대 전환 금지
-                if (!(body.Count > 1 && beforeVec.X == dir.X && beforeVec.Y == dir.Y))
-                {
-                    return;
+                    case ConsoleKey.RightArrow:
+                        if(dir.X != -1)
+                        {
+                            dir = new Vector2(1, 0);
+                        }
+                        break;
+                    case ConsoleKey.LeftArrow:
+                        if (dir.X != 1)
+                        {
+                            dir = new Vector2(-1, 0);
+                        }
+                        break;
+                    case ConsoleKey.UpArrow:
+                        if (dir.Y != 1)
+                        {
+                            dir = new Vector2(0, -1);
+                        }
+                        break;
+                    case ConsoleKey.DownArrow:
+                        if (dir.Y != -1)
+                        {
+                            dir = new Vector2(0, 1);
+                        }
+                        break;
                 }
             }
 
-
-
+            nextHead = (head.col + (int)dir.Y, head.row + (int)dir.X);
         }
 
-        public bool GameOver(Map m, int i)
+        public bool GameOver(Map m)
         {
-            if (m.map[bodyArr[i].Item1, bodyArr[i].Item2] == '-' || m.map[bodyArr[i].Item1, bodyArr[i].Item2] == '|')
+            if (nextHead.c <= 0 || nextHead.c >= 19 || nextHead.r <= 0 || nextHead.r >= 19)
             {
                 return true;
+            }
+
+            var tail = body.Last.Value;
+            char cell = m.map[nextHead.c, nextHead.r];
+            bool willGrow = (cell == '*');
+
+            if(cell == '0')
+            {
+                bool isTailCell = (nextHead.c == tail.col && nextHead.r == tail.row);
+                if(!(isTailCell && !willGrow))
+                {
+                    return true;
+                }
+            }
+
+            body.AddFirst((nextHead.c, nextHead.r));
+            m.map[nextHead.c, nextHead.r] = '0';
+            col = nextHead.c;
+            row = nextHead.r;
+
+            if(!willGrow)
+            {
+                var oldTail = body.Last.Value;
+                body.RemoveLast();
+                m.map[oldTail.col, oldTail.row] = ' ';
             }
 
             return false;
         }
 
-        public void AddBody(Map m)
-        {
-            bodyCount++;
-
-            if (dir.X != 0)
-            {
-                switch (dir.X)
-                {
-                    case 1:
-                        bodyArr[bodyCount].Item2 = bodyArr[bodyCount - 1].Item2 - 1;
-                        break;
-                    case -1:
-                        bodyArr[bodyCount].Item2 = bodyArr[bodyCount - 1].Item2 + 1; ;
-                        break;
-                }
-            }
-            else
-            {
-                switch (dir.Y)
-                {
-                    case 1:
-                        bodyArr[bodyCount].Item1 = bodyArr[bodyCount - 1].Item1 + 1; ;
-                        break;
-                    case -1:
-                        bodyArr[bodyCount].Item1 = bodyArr[bodyCount - 1].Item1 - 1; ;
-                        break;
-                }
-            }
-        }
-
-        public void BodyReset()
-        {
-            bodyArr = new (int, int)[50];
-        }
+        
     }
 }
